@@ -6,7 +6,7 @@ import helmet from 'helmet';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import responseTime from 'response-time';
-import WebSocket from 'ws';
+import { Server } from 'socket.io';
 import http from 'http';
 
 // Initialize Express
@@ -65,35 +65,16 @@ app.use(cors(corsMiddlewareOptions));
 
 // Start WebSocket
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server, path: '/socket' });
 
-function heartbeat() {
-  this.isAlive = true;
-}
-
-wss.on('connection', (ws) => {
-  const socket = ws;
-  // @ts-ignore
-  socket.isAlive = true;
-  socket.on('pong', heartbeat);
-});
-
-const interval = setInterval(() => {
-  // eslint-disable-next-line consistent-return
-  wss.clients.forEach((ws) => {
-    // @ts-ignore
-    if (!ws.isAlive) return ws.terminate();
-    // @ts-ignore
-    ws.isAlive = false;
-    ws.ping();
-    ws.send(JSON.stringify({ type: 'pong' }));
-  });
-}, 5000);
-
-wss.on('close', () => {
-  clearInterval(interval);
+// use it in controller
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_APP_DOMAIN,
+    methods: ['GET', 'POST'],
+  },
+  transports: ['websocket'],
 });
 
 // Start the server
 // eslint-disable-next-line no-console
-app.listen(PORT, () => console.log(`Server started and listeningg on ${PORT}`));
+server.listen(PORT, () => console.log(`Server started and listeningg on ${PORT}`));

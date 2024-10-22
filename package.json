@@ -27,6 +27,7 @@
     "prisma": "^5.4.2",
     "prismix": "^1.0.22",
     "response-time": "^2.3.2",
+    "socket.io": "^4.8.0",
     "validator": "^13.11.0",
     "ws": "^8.16.0"
   },
